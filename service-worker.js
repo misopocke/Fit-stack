@@ -1,12 +1,12 @@
 // サービスワーカーのバージョン
 const CACHE_NAME = 'fit-stack-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/workout-app.js',
-  '/workout-data.js',
-  '/workout-storage.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './workout-app.js',
+  './workout-data.js',
+  './workout-storage.js',
+  './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/lucide@latest',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
@@ -71,7 +71,7 @@ self.addEventListener('fetch', (event) => {
         }).catch(() => {
           // ネットワークエラーの場合、オフラインページを返す（オプション）
           // 今回はindex.htmlを返す
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         });
       })
   );

@@ -146,6 +146,17 @@ function initializeApp() {
   }
 }
 
+// サービスワーカーの登録（PWA対応）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .catch((error) => {
+        // サービスワーカーの登録に失敗した場合もアプリは動作する
+        console.error('サービスワーカーの登録に失敗しました:', error);
+      });
+  });
+}
+
 // DOMContentLoadedイベントで初期化
 document.addEventListener('DOMContentLoaded', initializeApp);
 
@@ -2019,11 +2030,6 @@ function updateProgressGraph() {
   
   const selectedExercise = { bodyPart, equipmentType, name: exercise };
   const records = getRecordsByExercise(selectedExercise);
-  
-  // デバッグ用（一時的）
-  console.log('Selected exercise:', selectedExercise);
-  console.log('All records:', getRecords());
-  console.log('Filtered records:', records);
   
   if (records.length === 0) {
     destroyProgressChart();

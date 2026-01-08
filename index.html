@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fit stack</title>
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fit stack">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -59,7 +68,7 @@
                 <form id="recordForm" class="space-y-6">
                     <div class="mb-6 bg-slate-800 p-5 rounded-xl overflow-hidden">
                         <label for="recordDate" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">日付</label>
-                        <input type="date" id="recordDate" class="max-w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500 box-border" required>
+                        <input type="date" id="recordDate" class="max-w-full md:w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500 box-border" required>
                     </div>
 
                     <div class="mb-6 bg-slate-800 p-5 rounded-xl">
@@ -183,7 +192,7 @@
                 <h2 class="text-2xl font-semibold text-slate-200 mb-6 tracking-tight">記録履歴</h2>
                 <div class="mb-6 bg-slate-800 p-5 rounded-xl overflow-hidden">
                     <label for="historyDateFilter" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">日付でフィルター</label>
-                    <input type="date" id="historyDateFilter" class="max-w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500 box-border">
+                    <input type="date" id="historyDateFilter" class="max-w-full md:w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500 box-border">
                 </div>
                 <div class="mt-5" id="recordsList">
                     <!-- 記録が表示される -->
