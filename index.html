@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fit stack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* セクション表示制御 */
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        
+        /* ボトムナビゲーションのアクティブ状態 */
+        /* SVG要素にも対応（Lucide Iconsが変換した後） */
+        .bottom-nav-item.active svg,
+        .bottom-nav-item.active i,
+        .bottom-nav-item.active span {
+            color: #818cf8; /* text-indigo-400 */
+        }
+        
+        .bottom-nav-item:not(.active) svg,
+        .bottom-nav-item:not(.active) i,
+        .bottom-nav-item:not(.active) span {
+            color: #64748b; /* text-slate-500 */
+        }
+        
+        .bottom-nav-item:hover:not(.active) svg,
+        .bottom-nav-item:hover:not(.active) i,
+        .bottom-nav-item:hover:not(.active) span {
+            color: #cbd5e1; /* text-slate-300 */
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen font-sans">
+    <div class="max-w-6xl mx-auto bg-slate-900 min-h-screen">
+        <header class="bg-slate-800 border-b border-slate-700 px-6 py-5">
+            <div class="flex items-center justify-center gap-3">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+                    <rect width="100" height="100" rx="20" fill="#0f172A"/>
+                    <rect x="20" y="65" width="60" height="12" rx="4" fill="#4338ca" />
+                    <rect x="25" y="48" width="50" height="12" rx="4" fill="#3b82f6" />
+                    <rect x="30" y="31" width="40" height="12" rx="4" fill="#0ea5e9" />
+                    <circle cx="75" cy="25" r="4" fill="#38bdf8" fill-opacity="0.8" />
+                </svg>
+                <h1 class="text-3xl font-semibold text-slate-200 tracking-tight">Fit stack</h1>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-8 bg-slate-900" id="contentArea">
+            <!-- 記録セクション -->
+            <section id="record" class="section active">
+                <h2 class="text-2xl font-semibold text-slate-200 mb-6 tracking-tight">トレーニング記録</h2>
+                <form id="recordForm" class="space-y-6">
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label for="recordDate" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">日付</label>
+                        <input type="date" id="recordDate" class="w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500" required>
+                    </div>
+
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label for="workoutSetSelect" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">トレーニングセットから選択（任意）</label>
+                        <select id="workoutSetSelect" class="w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20">
+                            <option value="">セットを選択...</option>
+                        </select>
+                    </div>
+
+                    <div id="exerciseListContainer" class="hidden mt-5 p-5 bg-slate-800 rounded-xl border border-slate-700">
+                        <label class="block mb-3 font-medium text-sm text-slate-300">セット内の種目</label>
+                        <div id="exerciseList" class="flex flex-col gap-2">
+                            <!-- 種目リストが動的に追加される -->
+                        </div>
+                        <div class="flex gap-2.5 mt-3">
+                            <button type="button" class="hidden px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg font-medium cursor-pointer transition-all duration-200 font-sans flex items-center gap-2" id="prevExerciseBtn">
+                                <span class="w-4 h-4 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </span>
+                                <span>前の種目</span>
+                            </button>
+                            <button type="button" class="hidden px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg font-medium cursor-pointer transition-all duration-200 font-sans flex items-center gap-2" id="nextExerciseBtn">
+                                <span class="w-4 h-4 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </span>
+                                <span>次の種目</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">種目選択</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                            <select id="bodyPartSelect" class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20">
+                                <option value="">部位を選択</option>
+                            </select>
+                            <select id="equipmentTypeSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                                <option value="">器具タイプを選択</option>
+                            </select>
+                            <select id="exerciseSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                                <option value="">種目を選択</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">セット情報</label>
+                        <div class="mt-5" id="setsContainer">
+                            <!-- セット入力フィールドが動的に追加される -->
+                        </div>
+                        <div class="flex flex-col md:flex-row gap-3 mt-3">
+                            <button type="button" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg font-medium cursor-pointer transition-all duration-200 font-sans flex items-center gap-2" id="addSetBtn">
+                                <span class="w-4 h-4 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </span>
+                                <span>セットを追加</span>
+                            </button>
+                            <button type="button" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg font-medium cursor-pointer transition-all duration-200 font-sans flex items-center gap-2" id="copyLastSetBtn">
+                                <span class="w-4 h-4 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </span>
+                                <span>セットを複製</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- セット管理セクション -->
+            <section id="sets" class="section">
+                <h2 class="text-2xl font-semibold text-slate-200 mb-6 tracking-tight">トレーニングセット管理</h2>
+                <form id="workoutSetForm" class="space-y-6">
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label for="workoutSetName" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">セット名</label>
+                        <input type="text" id="workoutSetName" placeholder="例: 上半身デー" class="w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500" required>
+                    </div>
+
+                    <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                        <label class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">種目を追加</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                            <select id="setBodyPartSelect" class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20">
+                                <option value="">部位を選択</option>
+                            </select>
+                            <select id="setEquipmentTypeSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                                <option value="">器具タイプを選択</option>
+                            </select>
+                            <select id="setExerciseSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                                <option value="">種目を選択</option>
+                            </select>
+                        </div>
+                        <button type="button" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg font-medium cursor-pointer transition-all duration-200 font-sans mt-2.5" id="addExerciseToSetBtn">種目を追加</button>
+                    </div>
+
+                    <div id="setExercisesList" class="flex flex-wrap gap-2 mt-5">
+                        <!-- 追加された種目が表示される -->
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" class="px-6 py-3 min-h-[48px] bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 active:scale-[0.98] text-white rounded-lg text-base font-medium cursor-pointer transition-all duration-200 font-sans">セットを保存</button>
+                        <button type="button" class="px-6 py-3 min-h-[48px] bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 rounded-lg text-base font-medium cursor-pointer transition-all duration-200 font-sans" id="clearSetFormBtn">クリア</button>
+                    </div>
+                </form>
+
+                <div class="mt-5" id="workoutSetsList">
+                    <!-- 保存されたセットが表示される -->
+                </div>
+            </section>
+
+            <!-- 履歴セクション -->
+            <section id="history" class="section">
+                <h2 class="text-2xl font-semibold text-slate-200 mb-6 tracking-tight">記録履歴</h2>
+                <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                    <label for="historyDateFilter" class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">日付でフィルター</label>
+                    <input type="date" id="historyDateFilter" class="w-full px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base font-sans bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500">
+                </div>
+                <div class="mt-5" id="recordsList">
+                    <!-- 記録が表示される -->
+                </div>
+            </section>
+
+            <!-- 進捗グラフセクション -->
+            <section id="progress" class="section">
+                <h2 class="text-2xl font-semibold text-slate-200 mb-6 tracking-tight">進捗グラフ</h2>
+                <div class="mb-6 bg-slate-800 p-5 rounded-xl">
+                    <label class="block mb-2 font-medium text-sm text-slate-300 tracking-tight">種目を選択</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <select id="graphBodyPartSelect" class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-700 text-slate-200 transition-all duration-200 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20">
+                            <option value="">部位を選択</option>
+                        </select>
+                        <select id="graphEquipmentTypeSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                            <option value="">器具タイプを選択</option>
+                        </select>
+                        <select id="graphExerciseSelect" disabled class="px-4 py-3 min-h-[48px] border border-slate-600 rounded-lg text-base bg-slate-600 text-slate-500 cursor-not-allowed transition-all duration-200">
+                            <option value="">種目を選択</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-5 relative h-[400px] bg-slate-800 rounded-xl p-5">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </section>
+        </div>
+        
+        <!-- 固定フッター（記録セクションのみ表示） -->
+        <div id="stickyFooter" class="hidden fixed left-0 right-0 bg-slate-800 border-t border-slate-700 p-4 shadow-lg z-40" style="bottom: 70px;">
+            <button type="submit" form="recordForm" class="w-full px-6 py-4 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 active:scale-[0.98] text-white rounded-lg text-lg font-semibold cursor-pointer transition-all duration-200 font-sans min-h-[56px] flex items-center justify-center gap-2">
+                <span class="w-5 h-5 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                </span>
+                <span>記録を保存</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- ボトムナビゲーション -->
+    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 w-full bg-slate-900/95 backdrop-blur border-t border-slate-800 z-50">
+        <div class="flex justify-around items-center py-2">
+            <button class="bottom-nav-item active flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-4 py-2 transition-colors duration-200" data-section="record">
+                <i data-lucide="edit-3" class="w-6 h-6 mb-1 text-indigo-400"></i>
+                <span class="text-[10px] font-medium text-indigo-400">記録</span>
+            </button>
+            <button class="bottom-nav-item flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-4 py-2 transition-colors duration-200" data-section="sets">
+                <i data-lucide="dumbbell" class="w-6 h-6 mb-1 text-slate-500"></i>
+                <span class="text-[10px] font-medium text-slate-500">セット管理</span>
+            </button>
+            <button class="bottom-nav-item flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-4 py-2 transition-colors duration-200" data-section="history">
+                <i data-lucide="calendar" class="w-6 h-6 mb-1 text-slate-500"></i>
+                <span class="text-[10px] font-medium text-slate-500">履歴</span>
+            </button>
+            <button class="bottom-nav-item flex flex-col items-center justify-center min-h-[48px] min-w-[48px] px-4 py-2 transition-colors duration-200" data-section="progress">
+                <i data-lucide="line-chart" class="w-6 h-6 mb-1 text-slate-500"></i>
+                <span class="text-[10px] font-medium text-slate-500">進捗</span>
+            </button>
+        </div>
+    </nav>
+
+    <script src="workout-data.js"></script>
+    <script src="workout-storage.js"></script>
+    <script src="workout-app.js"></script>
+</body>
+</html>
