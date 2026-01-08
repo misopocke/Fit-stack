@@ -1,15 +1,13 @@
 // サービスワーカーのバージョン
 const CACHE_NAME = 'fit-stack-v1';
+// 内部ファイルのみをキャッシュ（外部CDNは除外）
 const urlsToCache = [
   './',
   './index.html',
   './workout-app.js',
   './workout-data.js',
   './workout-storage.js',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/lucide@latest',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+  './manifest.json'
 ];
 
 // インストール時の処理
@@ -48,6 +46,15 @@ self.addEventListener('activate', (event) => {
 
 // フェッチ時の処理（オフライン対応）
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // 外部CDNのリクエストは常にネットワークから取得（キャッシュしない）
+  if (url.origin !== self.location.origin) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
+  // 内部ファイルのみキャッシュを利用
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -69,8 +76,7 @@ self.addEventListener('fetch', (event) => {
             });
           return response;
         }).catch(() => {
-          // ネットワークエラーの場合、オフラインページを返す（オプション）
-          // 今回はindex.htmlを返す
+          // ネットワークエラーの場合、オフラインページを返す
           return caches.match('./index.html');
         });
       })
